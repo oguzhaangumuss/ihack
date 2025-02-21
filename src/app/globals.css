@@ -49,3 +49,20 @@ body {
     object-fit: cover;
   }
 }
+
+/* Loading spinner optimizasyonu */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+/* Video yükleme optimizasyonu */
+video {
+  background: black;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}

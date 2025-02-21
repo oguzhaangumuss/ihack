@@ -17,62 +17,59 @@ export default function Home() {
     };
 
     checkMobile();
-    window.addEventListener('resize', checkMobile);
+    
+    const video = videoRef.current;
+    const audio = audioRef.current;
 
-    // Video ve ses kontrolü
-    if (videoRef.current) {
-      // Video yüklendiğinde
-      const handleVideoLoad = () => {
-        console.log('Video can play through');
-        setIsVideoLoaded(true);
-      };
+    const handleVideoLoad = () => {
+      console.log('Video can play through');
+      setIsVideoLoaded(true);
+    };
 
-      videoRef.current.addEventListener('canplaythrough', handleVideoLoad, { once: true });
-      
-      // Eğer video zaten yüklenmişse
-      if (videoRef.current.readyState >= 4) {
-        setIsVideoLoaded(true);
-      }
+    const handleVideoError = (e: Event) => {
+      console.error('Video loading error:', e);
+      setIsVideoLoaded(true); // Hata durumunda bile loading ekranını kaldır
+    };
 
-      videoRef.current.addEventListener('error', (e) => {
-        console.error('Video loading error:', e);
-      });
-
-      // Video bittiğinde
-      videoRef.current.addEventListener('ended', () => {
-        setIsPlaying(false);
-        if (videoRef.current) {
-          videoRef.current.currentTime = 0;
-        }
-      });
+    if (video) {
+      video.addEventListener('loadeddata', handleVideoLoad);
+      video.addEventListener('canplaythrough', handleVideoLoad);
+      video.addEventListener('error', handleVideoError);
     }
 
-    // Ses ayarları
-    if (audioRef.current) {
-      audioRef.current.volume = 0.5;
-      audioRef.current.load();
-      audioRef.current.addEventListener('loadeddata', () => {
-        setIsAudioLoaded(true);
-        console.log('Audio loaded successfully');
-      });
-      audioRef.current.addEventListener('error', (e) => {
+    const handleAudioLoad = () => {
+      setIsAudioLoaded(true);
+      console.log('Audio loaded successfully');
+    };
+
+    if (audio) {
+      audio.addEventListener('loadeddata', handleAudioLoad);
+      audio.addEventListener('error', (e) => {
         console.error('Audio load error:', e);
+        setIsAudioLoaded(true);
       });
+      audio.preload = 'auto';
+      audio.load();
     }
+
+    // Yükleme zaman aşımı
+    const timeout = setTimeout(() => {
+      setIsVideoLoaded(true);
+      setIsAudioLoaded(true);
+    }, 5000);
 
     return () => {
-      window.removeEventListener('resize', checkMobile);
-      if (videoRef.current) {
-        videoRef.current.removeEventListener('canplaythrough', () => {});
-        videoRef.current.removeEventListener('ended', () => {});
-        videoRef.current.removeEventListener('error', () => {});
+      clearTimeout(timeout);
+      if (video) {
+        video.removeEventListener('loadeddata', handleVideoLoad);
+        video.removeEventListener('canplaythrough', handleVideoLoad);
+        video.removeEventListener('error', handleVideoError);
       }
-      if (audioRef.current) {
-        audioRef.current.removeEventListener('loadeddata', () => {});
-        audioRef.current.removeEventListener('error', () => {});
+      if (audio) {
+        audio.removeEventListener('loadeddata', handleAudioLoad);
       }
     };
-  }, []);
+  }, [isMobile]);
 
   const playAudio = async () => {
     if (audioRef.current) {
@@ -100,6 +97,7 @@ export default function Home() {
     if (videoRef.current) {
       try {
         if (!isPlaying) {
+          videoRef.current.currentTime = 0;
           await videoRef.current.play();
           setIsPlaying(true);
           if (!isSoundPlaying) {
@@ -108,6 +106,7 @@ export default function Home() {
         } else {
           videoRef.current.pause();
           setIsPlaying(false);
+          pauseAudio();
         }
       } catch (error) {
         console.error('Video play error:', error);
@@ -127,19 +126,36 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-full h-screen overflow-hidden bg-black">
+    <main className="relative w-screen h-screen">
+      {/* Video Container */}
+      <div className="video-container-mobile">
+        <video
+          ref={videoRef}
+          className={`
+            absolute top-0 left-0 w-full h-full 
+            object-cover md:object-contain
+            transform transition-transform duration-300
+          `}
+          playsInline
+          muted
+          preload="auto"
+          webkit-playsinline="true"
+          crossOrigin="anonymous"
+          loop={false}
+        >
+          <source src="/video/bg-video2.mp4" type="video/mp4" />
+        </video>
+      </div>
+
       {/* Loading Screen */}
-      <div className={`absolute inset-0 z-20 flex items-center justify-center bg-black
-                    transition-opacity duration-1000 ${isVideoLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-        <div className="text-center">
-          <div className="inline-block w-16 h-16 mb-4">
-            <div className="w-full h-full border-4 border-[#5be2b3]/20 border-t-[#5be2b3] 
-                          rounded-full animate-spin"></div>
-          </div>
-          <div className="text-[#5be2b3] text-xl font-light tracking-wider animate-pulse">
-            LOADING
-          </div>
-        </div>
+      <div 
+        className={`
+          absolute inset-0 z-20 flex items-center justify-center bg-black
+          transition-opacity duration-1000 
+          ${(isVideoLoaded && isAudioLoaded) ? 'opacity-0 pointer-events-none' : 'opacity-100'}
+        `}
+      >
+        <div className="animate-spin h-12 w-12 border-4 border-white border-t-transparent rounded-full" />
       </div>
 
       {/* Background Audio */}
@@ -150,24 +166,6 @@ export default function Home() {
       >
         <source src="/sound/bg-sound.mp3" type="audio/mp3" />
       </audio>
-
-      {/* Background Video Container */}
-      <div className="absolute inset-0 w-full h-full video-container-mobile">
-        <div className="relative h-0 pb-[56.25%]"> {/* 16:9 aspect ratio */}
-          <video
-            ref={videoRef}
-            className={`
-              absolute top-0 left-0 w-full h-full 
-              object-cover md:object-contain
-              transform transition-transform duration-300
-            `}
-            playsInline
-            preload="auto"
-          >
-            <source src="/video/bg-video2.mp4" type="video/mp4" />
-          </video>
-        </div>
-      </div>
 
       {/* Sound Toggle Button */}
       <button
