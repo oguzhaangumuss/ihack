@@ -4,16 +4,10 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
 
   useEffect(() => {
     if (videoRef.current) {
-      videoRef.current.addEventListener('loadeddata', () => {
-        setIsVideoLoaded(true);
-        console.log('Video loaded successfully');
-      });
-
       videoRef.current.addEventListener('error', (e) => {
         console.error('Video loading error:', e);
       });
