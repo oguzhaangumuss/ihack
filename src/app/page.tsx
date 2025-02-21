@@ -10,6 +10,7 @@ export default function Home() {
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
   const [isVideoLoaded, setIsVideoLoaded] = useState(false);
+  const [isButtonDisabled, setIsButtonDisabled] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -28,13 +29,21 @@ export default function Home() {
 
     const handleVideoError = (e: Event) => {
       console.error('Video loading error:', e);
-      setIsVideoLoaded(true); // Hata durumunda bile loading ekranını kaldır
+      setIsVideoLoaded(true);
+    };
+
+    const handleVideoEnd = () => {
+      setIsPlaying(false);
+      setIsButtonDisabled(false);
+      pauseAudio();
+      console.log('Video ended');
     };
 
     if (video) {
       video.addEventListener('loadeddata', handleVideoLoad);
       video.addEventListener('canplaythrough', handleVideoLoad);
       video.addEventListener('error', handleVideoError);
+      video.addEventListener('ended', handleVideoEnd);
     }
 
     const handleAudioLoad = () => {
@@ -64,6 +73,7 @@ export default function Home() {
         video.removeEventListener('loadeddata', handleVideoLoad);
         video.removeEventListener('canplaythrough', handleVideoLoad);
         video.removeEventListener('error', handleVideoError);
+        video.removeEventListener('ended', handleVideoEnd);
       }
       if (audio) {
         audio.removeEventListener('loadeddata', handleAudioLoad);
@@ -94,22 +104,20 @@ export default function Home() {
   };
 
   const handlePlayClick = async () => {
-    if (videoRef.current) {
+    if (videoRef.current && !isButtonDisabled) {
       try {
         if (!isPlaying) {
+          setIsButtonDisabled(true);
           videoRef.current.currentTime = 0;
           await videoRef.current.play();
           setIsPlaying(true);
           if (!isSoundPlaying) {
             await playAudio();
           }
-        } else {
-          videoRef.current.pause();
-          setIsPlaying(false);
-          pauseAudio();
         }
       } catch (error) {
         console.error('Video play error:', error);
+        setIsButtonDisabled(false);
       }
     }
   };
@@ -126,25 +134,31 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-screen h-screen">
+    <main className="relative w-screen h-screen overflow-hidden">
       {/* Video Container */}
-      <div className="video-container-mobile">
-        <video
-          ref={videoRef}
-          className={`
-            absolute top-0 left-0 w-full h-full 
-            object-cover md:object-contain
-            transform transition-transform duration-300
-          `}
-          playsInline
-          muted
-          preload="auto"
-          webkit-playsinline="true"
-          crossOrigin="anonymous"
-          loop={false}
-        >
-          <source src="/video/bg-video2.mp4" type="video/mp4" />
-        </video>
+      <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
+        <div className="relative w-full h-full min-w-[100vw] min-h-[100vh]">
+          <video
+            ref={videoRef}
+            className={`
+              absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+              min-w-full min-h-full w-auto h-auto
+              object-contain md:object-cover
+              ios-fix
+            `}
+            playsInline
+            muted
+            preload="metadata"
+            webkit-playsinline="true"
+            x-webkit-airplay="deny"
+            disableRemotePlayback
+            controls={false}
+            loop={false}
+          >
+            <source src="/video/bg-video2.mp4" type="video/mp4" />
+            <source src="/video/bg-video2.webm" type="video/webm" />
+          </video>
+        </div>
       </div>
 
       {/* Loading Screen */}
@@ -193,16 +207,22 @@ export default function Home() {
                     ${isMobile ? 'scale-75' : ''}`}>
         <button
           onClick={handlePlayClick}
-          className="w-32 h-32 rounded-full cursor-pointer relative group"
+          disabled={isButtonDisabled}
+          className={`w-32 h-32 rounded-full cursor-pointer relative group
+                     ${isButtonDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
         >
           {/* Hover/Touch Glow Effect */}
-          <div className={`absolute inset-0 ${isMobile ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'} 
+          <div className={`absolute inset-0 
+                        ${isMobile ? 'opacity-50' : 'opacity-0 group-hover:opacity-100'} 
+                        ${isButtonDisabled ? 'opacity-0' : ''}
                         transition-all duration-500
                         bg-gradient-radial from-[#5be2b3]/30 via-transparent to-transparent
                         blur-xl rounded-full scale-150`} />
           
           {/* Inner Glow */}
-          <div className={`absolute inset-0 ${isMobile ? 'opacity-30' : 'opacity-0 group-hover:opacity-70'} 
+          <div className={`absolute inset-0 
+                        ${isMobile ? 'opacity-30' : 'opacity-0 group-hover:opacity-70'}
+                        ${isButtonDisabled ? 'opacity-0' : ''} 
                         transition-all duration-500
                         bg-[#5be2b3]/10 rounded-full
                         group-hover:shadow-[0_0_30px_15px_rgba(91,226,179,0.2)]`} />
