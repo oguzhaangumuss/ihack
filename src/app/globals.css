@@ -110,3 +110,112 @@ video {
     scale: 0.8;
   }
 }
+
+/* Buton pulse animasyonu */
+@keyframes pulse {
+  0% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+}
+
+/* Buton glow animasyonu */
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 15px 5px rgba(91, 226, 179, 0.1);
+  }
+  50% {
+    box-shadow: 0 0 25px 10px rgba(91, 226, 179, 0.3);
+  }
+  100% {
+    box-shadow: 0 0 15px 5px rgba(91, 226, 179, 0.1);
+  }
+}
+
+/* Buton hover ve pulse efektleri */
+.button-glow {
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.button-glow:before {
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 50%;
+  background: transparent;
+  animation: glow 2s infinite ease-in-out;
+}
+
+/* Mobil cihazlar için sürekli animasyon */
+@media (max-width: 768px) {
+  .button-glow,
+  .button-glow:before {
+    animation-duration: 3s;
+  }
+}
+
+/* Video tam ekran ayarları */
+.video-fullscreen {
+  object-fit: cover;
+  background: black;
+  z-index: 1;
+}
+
+/* Uzun ekranlar için video pozisyonlama */
+@media (min-aspect-ratio: 18/9) {
+  .video-fullscreen {
+    object-position: center 25%;
+  }
+}
+
+/* Dikey mod için video ayarları */
+@media (orientation: portrait) {
+  .video-fullscreen {
+    width: auto;
+    height: 130vh;
+    transform: translate(-50%, -45%);
+  }
+}
+
+/* Yatay mod için video ayarları */
+@media (orientation: landscape) {
+  .video-fullscreen {
+    width: 100vw;
+    min-height: 100vh;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* iOS özel düzeltmeleri */
+@supports (-webkit-touch-callout: none) {
+  .video-fullscreen {
+    transform: translate(-50%, -50%) scale(1.2);
+  }
+}
+
+/* Android özel düzeltmeleri */
+@supports not (-webkit-touch-callout: none) {
+  .video-fullscreen {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+}
+
+/* Video container z-index ve pozisyonlama */
+.video-container-mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1;
+  background-color: black;
+  overflow: hidden;
+}

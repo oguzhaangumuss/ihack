@@ -81,6 +81,37 @@ export default function Home() {
     };
   }, [isMobile]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (videoRef.current) {
+        const screenRatio = window.innerWidth / window.innerHeight;
+        const videoRatio = videoRef.current.videoWidth / videoRef.current.videoHeight;
+        
+        if (screenRatio > videoRatio) {
+          videoRef.current.style.width = '100vw';
+          videoRef.current.style.height = 'auto';
+        } else {
+          videoRef.current.style.width = 'auto';
+          videoRef.current.style.height = '100vh';
+        }
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    
+    // Video yüklendiğinde boyutları ayarla
+    if (videoRef.current) {
+      videoRef.current.addEventListener('loadedmetadata', handleResize);
+    }
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      if (videoRef.current) {
+        videoRef.current.removeEventListener('loadedmetadata', handleResize);
+      }
+    };
+  }, []);
+
   const playAudio = async () => {
     if (audioRef.current) {
       try {
@@ -134,31 +165,30 @@ export default function Home() {
   };
 
   return (
-    <main className="relative w-screen h-screen overflow-hidden">
+    <main className="relative w-screen h-screen overflow-hidden bg-black">
       {/* Video Container */}
-      <div className="absolute inset-0 w-full h-full flex items-center justify-center overflow-hidden">
-        <div className="relative w-full h-full min-w-[100vw] min-h-[100vh]">
-          <video
-            ref={videoRef}
-            className={`
-              absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-              min-w-full min-h-full w-auto h-auto
-              object-contain md:object-cover
-              ios-fix
-            `}
-            playsInline
-            muted
-            preload="metadata"
-            webkit-playsinline="true"
-            x-webkit-airplay="deny"
-            disableRemotePlayback
-            controls={false}
-            loop={false}
-          >
-            <source src="/video/bg-video2.mp4" type="video/mp4" />
-            <source src="/video/bg-video2.webm" type="video/webm" />
-          </video>
-        </div>
+      <div className="absolute inset-0 w-full h-full">
+        <video
+          ref={videoRef}
+          className={`
+            absolute top-1/2 left-1/2 
+            transform -translate-x-1/2 -translate-y-1/2
+            min-w-full min-h-full
+            w-auto h-auto
+            video-fullscreen
+          `}
+          playsInline
+          muted
+          preload="metadata"
+          webkit-playsinline="true"
+          x-webkit-airplay="deny"
+          disableRemotePlayback
+          controls={false}
+          loop={false}
+        >
+          <source src="/video/bg-video2.mp4" type="video/mp4" />
+          <source src="/video/bg-video2.webm" type="video/webm" />
+        </video>
       </div>
 
       {/* Loading Screen */}
@@ -208,8 +238,8 @@ export default function Home() {
         <button
           onClick={handlePlayClick}
           disabled={isButtonDisabled}
-          className={`w-32 h-32 rounded-full cursor-pointer relative group
-                     ${isButtonDisabled ? 'cursor-not-allowed opacity-50' : ''}`}
+          className={`w-32 h-32 rounded-full cursor-pointer relative group button-glow
+                     ${isButtonDisabled ? 'cursor-not-allowed opacity-50 animate-none' : ''}`}
         >
           {/* Hover/Touch Glow Effect */}
           <div className={`absolute inset-0 
