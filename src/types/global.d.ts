@@ -7,7 +7,10 @@ declare namespace JSX {
 }
 
 interface Window {
-  spline: any;
+  spline: {
+    viewer: unknown;
+    runtime: unknown;
+  }
 }
 
 export {}; 
