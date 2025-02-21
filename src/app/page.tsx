@@ -9,6 +9,7 @@ export default function Home() {
   const [isMobile, setIsMobile] = useState(false);
   const [isSoundPlaying, setIsSoundPlaying] = useState(false);
   const [isAudioLoaded, setIsAudioLoaded] = useState(false);
+  const [isVideoLoaded, setIsVideoLoaded] = useState(false);
 
   useEffect(() => {
     const checkMobile = () => {
@@ -20,16 +21,36 @@ export default function Home() {
 
     // Video ve ses kontrolü
     if (videoRef.current) {
+      // Video yüklendiğinde
+      const handleVideoLoad = () => {
+        console.log('Video can play through');
+        setIsVideoLoaded(true);
+      };
+
+      videoRef.current.addEventListener('canplaythrough', handleVideoLoad, { once: true });
+      
+      // Eğer video zaten yüklenmişse
+      if (videoRef.current.readyState >= 4) {
+        setIsVideoLoaded(true);
+      }
+
       videoRef.current.addEventListener('error', (e) => {
         console.error('Video loading error:', e);
+      });
+
+      // Video bittiğinde
+      videoRef.current.addEventListener('ended', () => {
+        setIsPlaying(false);
+        if (videoRef.current) {
+          videoRef.current.currentTime = 0;
+        }
       });
     }
 
     // Ses ayarları
     if (audioRef.current) {
       audioRef.current.volume = 0.5;
-      // Ses yüklendiğinde
-      audioRef.current.load(); // Sesi önceden yükle
+      audioRef.current.load();
       audioRef.current.addEventListener('loadeddata', () => {
         setIsAudioLoaded(true);
         console.log('Audio loaded successfully');
@@ -39,21 +60,16 @@ export default function Home() {
       });
     }
 
-    // Video bittiğinde
-    if (videoRef.current) {
-      videoRef.current.addEventListener('ended', () => {
-        setIsPlaying(false);
-        if (videoRef.current) {
-          videoRef.current.currentTime = 0; // Videoyu başa sar
-        }
-      });
-    }
-
     return () => {
       window.removeEventListener('resize', checkMobile);
-      // Event listener cleanup
       if (videoRef.current) {
+        videoRef.current.removeEventListener('canplaythrough', () => {});
         videoRef.current.removeEventListener('ended', () => {});
+        videoRef.current.removeEventListener('error', () => {});
+      }
+      if (audioRef.current) {
+        audioRef.current.removeEventListener('loadeddata', () => {});
+        audioRef.current.removeEventListener('error', () => {});
       }
     };
   }, []);
@@ -112,6 +128,20 @@ export default function Home() {
 
   return (
     <main className="relative w-full h-screen overflow-hidden bg-black">
+      {/* Loading Screen */}
+      <div className={`absolute inset-0 z-20 flex items-center justify-center bg-black
+                    transition-opacity duration-1000 ${isVideoLoaded ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+        <div className="text-center">
+          <div className="inline-block w-16 h-16 mb-4">
+            <div className="w-full h-full border-4 border-[#5be2b3]/20 border-t-[#5be2b3] 
+                          rounded-full animate-spin"></div>
+          </div>
+          <div className="text-[#5be2b3] text-xl font-light tracking-wider animate-pulse">
+            LOADING
+          </div>
+        </div>
+      </div>
+
       {/* Background Audio */}
       <audio
         ref={audioRef}
