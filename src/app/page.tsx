@@ -151,16 +151,22 @@ export default function Home() {
         <source src="/sound/bg-sound.mp3" type="audio/mp3" />
       </audio>
 
-      {/* Background Video */}
-      <div className="absolute inset-0 w-full h-full">
-        <video
-          ref={videoRef}
-          className="object-cover w-full h-full opacity-100"
-          playsInline
-          preload="auto"
-        >
-          <source src="/video/bg-video2.mp4" type="video/mp4" />
-        </video>
+      {/* Background Video Container */}
+      <div className="absolute inset-0 w-full h-full video-container-mobile">
+        <div className="relative h-0 pb-[56.25%]"> {/* 16:9 aspect ratio */}
+          <video
+            ref={videoRef}
+            className={`
+              absolute top-0 left-0 w-full h-full 
+              object-cover md:object-contain
+              transform transition-transform duration-300
+            `}
+            playsInline
+            preload="auto"
+          >
+            <source src="/video/bg-video2.mp4" type="video/mp4" />
+          </video>
+        </div>
       </div>
 
       {/* Sound Toggle Button */}
