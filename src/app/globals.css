@@ -28,7 +28,7 @@ body {
   position: absolute;
   height: 100vh;
   width: 300vw;
-  opacity: 0.4;
+  opacity: 0.8;
   mix-blend-mode: screen;
   background-repeat: repeat-x;
   background-size: contain;
