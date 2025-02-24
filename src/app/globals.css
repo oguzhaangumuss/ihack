@@ -7,215 +7,58 @@
   --foreground: #ffffff;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
   color: var(--foreground);
   background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
   overflow-x: hidden;
 }
 
-/* Video responsive ayarları */
-@media (max-width: 768px) {
-  .video-container-mobile {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1;
-    background-color: black;
+/* Sis Efekti Stilleri */
+.fog-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.fog-img {
+  position: absolute;
+  height: 100vh;
+  width: 300vw;
+  opacity: 0.4;
+  mix-blend-mode: screen;
+  background-repeat: repeat-x;
+  background-size: contain;
+  background-position: center;
+}
+
+.fog-img-first {
+  background-image: url("/images/fog-1.png");
+  animation: marquee 60s linear infinite;
+}
+
+.fog-img-second {
+  background-image: url("/images/fog-2.png");
+  animation: marquee 30s linear infinite;
+}
+
+@keyframes marquee {
+  0% {
+    transform: translate3d(0, 0, 0);
   }
-  
-  .video-container-mobile video {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) scale(1.1);
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-  
-  /* iOS özel ayarları */
-  @supports (-webkit-touch-callout: none) {
-    video {
-      transform: translate(-50%, -50%) scale(1.2);
-    }
-  }
-  
-  /* Android özel ayarları */
-  @supports not (-webkit-touch-callout: none) {
-    video {
-      transform: translate(-50%, -50%) scale(1.15);
-    }
+  100% {
+    transform: translate3d(-200vw, 0, 0);
   }
 }
 
-@media (orientation: landscape) and (max-width: 768px) {
-  .video-container-mobile video {
-    width: 100vw;
-    height: 100vh;
-    object-fit: cover;
-  }
-}
-
-/* Loading spinner optimizasyonu */
+/* Loading Spinner */
 .animate-spin {
-  animation: spin 1s linear infinite;
+  animation: spin 1.2s cubic-bezier(0.5, 0.2, 0.5, 0.8) infinite;
 }
 
 @keyframes spin {
-  from { transform: rotate(0deg); }
   to { transform: rotate(360deg); }
-}
-
-/* Video yükleme optimizasyonu */
-video {
-  background: black;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  transform-origin: center center;
-  will-change: transform;
-}
-
-/* iOS ve mobil cihazlar için video düzeltmeleri */
-.ios-fix {
-  -webkit-transform: translate(-50%, -50%) translateZ(0);
-  transform: translate(-50%, -50%) translateZ(0);
-  -webkit-perspective: 1000;
-  perspective: 1000;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
-}
-
-/* Mobil cihazlar için buton pozisyonlaması */
-@media (max-width: 768px) and (orientation: portrait) {
-  .video-control-container {
-    top: 65vh !important;
-    right: 50vw !important;
-    transform: translate(50%, -50%) !important;
-  }
-}
-
-@media (max-width: 768px) and (orientation: landscape) {
-  .video-control-container {
-    top: 50vh !important;
-    right: 15vw !important;
-    scale: 0.8;
-  }
-}
-
-/* Buton pulse animasyonu */
-@keyframes pulse {
-  0% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.05);
-  }
-  100% {
-    opacity: 0.3;
-    transform: scale(1);
-  }
-}
-
-/* Buton glow animasyonu */
-@keyframes glow {
-  0% {
-    box-shadow: 0 0 15px 5px rgba(91, 226, 179, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 25px 10px rgba(91, 226, 179, 0.3);
-  }
-  100% {
-    box-shadow: 0 0 15px 5px rgba(91, 226, 179, 0.1);
-  }
-}
-
-/* Buton hover ve pulse efektleri */
-.button-glow {
-  animation: pulse 2s infinite ease-in-out;
-}
-
-.button-glow:before {
-  content: '';
-  position: absolute;
-  inset: -5px;
-  border-radius: 50%;
-  background: transparent;
-  animation: glow 2s infinite ease-in-out;
-}
-
-/* Mobil cihazlar için sürekli animasyon */
-@media (max-width: 768px) {
-  .button-glow,
-  .button-glow:before {
-    animation-duration: 3s;
-  }
-}
-
-/* Video tam ekran ayarları */
-.video-fullscreen {
-  object-fit: cover;
-  background: black;
-  z-index: 1;
-}
-
-/* Uzun ekranlar için video pozisyonlama */
-@media (min-aspect-ratio: 18/9) {
-  .video-fullscreen {
-    object-position: center 25%;
-  }
-}
-
-/* Dikey mod için video ayarları */
-@media (orientation: portrait) {
-  .video-fullscreen {
-    width: auto;
-    height: 130vh;
-    transform: translate(-50%, -45%);
-  }
-}
-
-/* Yatay mod için video ayarları */
-@media (orientation: landscape) {
-  .video-fullscreen {
-    width: 100vw;
-    min-height: 100vh;
-    transform: translate(-50%, -50%);
-  }
-}
-
-/* iOS özel düzeltmeleri */
-@supports (-webkit-touch-callout: none) {
-  .video-fullscreen {
-    transform: translate(-50%, -50%) scale(1.2);
-  }
-}
-
-/* Android özel düzeltmeleri */
-@supports not (-webkit-touch-callout: none) {
-  .video-fullscreen {
-    transform: translate(-50%, -50%) scale(1.1);
-  }
-}
-
-/* Video container z-index ve pozisyonlama */
-.video-container-mobile {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 1;
-  background-color: black;
-  overflow: hidden;
 }
